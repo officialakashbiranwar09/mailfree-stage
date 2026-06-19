@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mailbox Management - iDing'sTemporary Mailbox</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="stylesheet" href="/css/app-sidebar.css" />
+  <link rel="stylesheet" href="/css/app-mailbox.css" />
+  <link rel="stylesheet" href="/css/app-compose.css" />
+  <link rel="stylesheet" href="/css/app-modal.css" />
+  <link rel="stylesheet" href="/css/app-responsive.css" />
+  <link rel="stylesheet" href="/css/components/forms.css" />
+  <link rel="stylesheet" href="/css/mailboxes.css" />
+  <link rel="stylesheet" href="/css/mailboxes-toolbar.css" />
+  <link rel="stylesheet" href="/css/mailboxes-subpage.css" />
+  <script src="/js/englishize.js" defer></script>
+  <!-- 暗黑模式样式 -->
+  <!-- Subject切换支持 -->
+  <script src="/js/theme-toggle.js"></script>
+</head>
+<body class="page-mailboxes">
+  <!-- SVG Icon Sprites -->
+  <svg style="display:none">
+    <use href="/icons/sprites.svg#icon-mail"/>
+  </svg>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <use href="/icons/sprites.svg#icon-mail"/>
+          </svg>
+        </span>
+        <span class="brand-text">iDing'sTemporary Mailbox - Mailbox Overview</span>
+      </div>
+      <div class="nav-actions">
+        <div class="spacer"></div>
+        <a class="btn btn-ghost" href="/" title="Back to Home">
+          <span class="btn-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <use href="/icons/sprites.svg#icon-home"/>
+            </svg>
+          </span>
+          <span class="btn-text">Home</span>
+        </a>
+        <button id="logout" class="btn btn-secondary" title="Logout">
+          <span class="btn-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <use href="/icons/sprites.svg#icon-logout"/>
+            </svg>
+          </span>
+          <span class="btn-text">Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="main">
+      <div class="card">
+        <h2>
+          <span class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <use href="/icons/sprites.svg#icon-package"/>
+            </svg>
+          </span>
+          All Mailboxes
+        </h2>
+        <div class="toolbar">
+          <!-- 第一行：Search + 筛选 -->
+          <div class="toolbar-row-1">
+            <div class="searchbar">
+              <input id="q" class="search-input" placeholder="Search mailbox address" aria-label="Search mailbox address" />
+              <button id="search" class="btn btn-primary btn-sm" aria-label="Search">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-search"/>
+                  </svg>
+                </span>
+                <span>Search</span>
+              </button>
+            </div>
+            <div class="filter-actions">
+              <select id="domain-filter" class="filter-select" title="按域名筛选">
+                <option value="">All Domains</option>
+              </select>
+              <select id="login-filter" class="filter-select" title="按AccessPermissions筛选">
+                <option value="">Login Status</option>
+                <option value="allowed">允许Access</option>
+                <option value="denied">禁止Access</option>
+              </select>
+              <select id="favorite-filter" class="filter-select" title="按收藏筛选">
+                <option value="">Favorite Status</option>
+                <option value="favorite">Favorited</option>
+                <option value="not-favorite">Not Favorited</option>
+              </select>
+              <select id="forward-filter" class="filter-select" title="按转发筛选">
+                <option value="">Forward Status</option>
+                <option value="has-forward">Set</option>
+                <option value="no-forward">Not Set</option>
+              </select>
+            </div>
+          </div>
+          <!-- 第二行：Bulk Action + 视图切换 -->
+          <div class="toolbar-row-2">
+            <div class="toolbar-spacer"></div>
+            <div class="batch-actions">
+              <button id="batch-allow" class="btn btn-ghost btn-sm" title="Allow SelectedMailboxAccess" aria-label="Allow Selected">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-check"/>
+                  </svg>
+                </span>
+                <span>Allow Selected</span>
+              </button>
+              <button id="batch-deny" class="btn btn-ghost btn-sm" title="Deny SelectedMailboxAccess" aria-label="Deny Selected">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-x-circle"/>
+                  </svg>
+                </span>
+                <span>Deny Selected</span>
+              </button>
+              <button id="batch-favorite" class="btn btn-ghost btn-sm" title="Favorite Selected" aria-label="Favorite Selected">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-star"/>
+                  </svg>
+                </span>
+                <span>Favorite Selected</span>
+              </button>
+              <button id="batch-unfavorite" class="btn btn-ghost btn-sm" title="批量Cancel收藏" aria-label="批量Cancel收藏">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-star-empty"/>
+                  </svg>
+                </span>
+                <span>批量Cancel</span>
+              </button>
+              <button id="batch-forward" class="btn btn-ghost btn-sm" title="批量Settings转发" aria-label="批量Settings转发">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-forward"/>
+                  </svg>
+                </span>
+                <span>Set Forwarding</span>
+              </button>
+              <button id="batch-clear-forward" class="btn btn-ghost btn-sm" title="批量Clear Forwarding" aria-label="批量Clear Forwarding">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <use href="/icons/sprites.svg#icon-x-circle"/>
+                  </svg>
+                </span>
+                <span>Clear Forwarding</span>
+              </button>
+            </div>
+            <div class="view-toggle">
+              <button id="view-grid" class="btn btn-ghost btn-sm active" title="Card Grid View" aria-label="网格视图">
+                <span class="view-icon grid-icon"></span>
+              </button>
+              <button id="view-list" class="btn btn-ghost btn-sm" title="List View" aria-label="列表视图">
+                <span class="view-icon list-icon"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="grid" class="grid"></div>
+        <div id="loading-placeholder" class="loading-placeholder">
+          <!-- 骨架屏Message将由JavaScript动态生成 -->
+        </div>
+        <div id="empty" class="empty-state" style="display:none">
+          <div class="empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5">
+              <use href="/icons/sprites.svg#icon-inbox-empty"/>
+            </svg>
+          </div>
+          <div class="empty-title">No Data</div>
+        </div>
+        <div class="pager">
+          <button id="prev" class="btn btn-ghost btn-sm">上一页</button>
+          <span id="page" class="muted page-indicator"></span>
+          <button id="next" class="btn btn-ghost btn-sm">下一页</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-slot"></div>
+  <!-- 重置Password二级页（模态框） -->
+  <div class="modal" id="reset-modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-icon">🔐</span>
+          <span>Reset Mailbox Password</span>
+        </div>
+        <button id="reset-close" class="close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">将把该Mailbox的Password重置为“default”（即Mailbox Address本身）。</p>
+        <div class="modal-info-box">
+          <div class="modal-info-label">Mailbox Address</div>
+          <div id="reset-email" class="modal-email-value"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="reset-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="reset-confirm" class="btn btn-danger">OK重置</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- AccessPermissions确认框（模态框） -->
+  <div class="modal" id="login-confirm-modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-icon" id="login-confirm-icon">🔒</span>
+          <span id="login-confirm-title">Confirm Action</span>
+        </div>
+        <button id="login-confirm-close" class="close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="login-confirm-message" class="modal-desc"></p>
+        <div class="modal-info-box">
+          <div class="modal-info-label">Mailbox Address</div>
+          <div id="login-confirm-email" class="modal-email-value"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="login-confirm-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="login-confirm-ok" class="btn btn-primary">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 修改Password模态框 -->
+  <div class="modal" id="change-password-modal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-icon">🔑</span>
+          <span>Change Mailbox Password</span>
+        </div>
+        <button id="change-password-close" class="close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">为该Mailbox Settings新的自定义Password。</p>
+        <div class="modal-info-box">
+          <div class="modal-info-label">Mailbox Address</div>
+          <div id="change-password-email" class="modal-email-value"></div>
+        </div>
+        <form id="change-password-form">
+          <div class="form-field">
+            <label class="form-label">新Password</label>
+            <input type="password" id="new-password" class="form-input" placeholder="Please enter新Password（至少6位）" minlength="6" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label">确认新Password</label>
+            <input type="password" id="confirm-password" class="form-input" placeholder="请再次输入新Password" minlength="6" required />
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="change-password-cancel" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="change-password-submit" class="btn btn-primary">修改Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bulk Action模态框 -->
+  <div class="modal" id="batch-login-modal" style="display:none">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <div>
+          <span class="modal-icon" id="batch-modal-icon">📝</span>
+          <span id="batch-modal-title">Bulk ActionMailboxAccessPermissions</span>
+        </div>
+        <button id="batch-modal-close" class="close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="batch-modal-message" class="modal-desc"></p>
+        <div class="form-field">
+          <label class="form-label">
+            Mailbox Address列表（one per line）
+          </label>
+          <textarea id="batch-emails-input" class="form-textarea" 
+                    placeholder="Please enterMailbox Address，one per line&#10;例如：&#10;user1@example.com&#10;user2@example.com&#10;user3@example.com" 
+                    rows="10"
+                    class="form-textarea-mono"></textarea>
+          <div class="form-hint">
+            <span id="batch-count-info">输入Mailbox后将show count</span>
+          </div>
+        </div>
+        <!-- 转发目标输入框（仅Set Forwarding时显示） -->
+        <div id="batch-forward-input-wrapper" class="form-field" style="display:none;">
+          <label class="form-label">
+            转发目标Mailbox
+          </label>
+          <input id="batch-forward-target" type="email" class="form-input"
+                 placeholder="所有选中Mailbox将转发到此地址" />
+        </div>
+        <div class="modal-footer">
+          <button id="batch-modal-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="batch-modal-confirm" class="btn btn-primary" disabled>
+            <span class="batch-btn-text">OK操作</span>
+            <span class="batch-btn-loading" style="display:none;">Processing...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Password操作模态框 -->
+  <div class="modal" id="password-modal" style="display:none">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <div>
+          <span class="modal-icon" id="password-modal-icon">🔑</span>
+          <span id="password-modal-title">Password操作</span>
+        </div>
+        <button id="password-modal-close" class="close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="password-modal-message" class="modal-desc"></p>
+        <!-- SettingsPassword输入框 -->
+        <div id="password-input-wrapper" class="form-field" style="display:none;">
+          <label class="form-label">
+            新Password
+          </label>
+          <input id="password-new-input" type="password" class="form-input"
+                 placeholder="Please enter新Password" />
+          <div class="form-hint">
+            <label class="show-password-label">
+              <input type="checkbox" id="password-show-toggle" />
+              Show Password
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="password-modal-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="password-modal-confirm" class="btn btn-primary">
+            <span class="password-btn-text">OK</span>
+            <span class="password-btn-loading" style="display:none;">Processing...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- AssignUser二级页面 -->
+  <div id="assign-user-subpage" class="subpage" style="display: none;">
+    <div class="subpage-overlay"></div>
+    <div class="subpage-content">
+      <div class="subpage-header">
+        <div class="subpage-title">
+          <span class="subpage-icon">👤</span>
+          <span>Assign Mailbox给User</span>
+        </div>
+        <button id="assign-subpage-close" class="subpage-close" title="关闭">✕</button>
+      </div>
+      
+      <div class="subpage-body">
+        <!-- Mailbox信息 -->
+        <div class="assign-mailbox-info">
+          <div class="info-label">Mailbox Address</div>
+          <div id="assign-subpage-email" class="info-value"></div>
+        </div>
+        
+        <!-- User List -->
+        <div class="assign-users-section">
+          <div class="section-header">
+            <h3>选择要Assign的User</h3>
+            <div class="selection-actions">
+              <button id="select-all-users" class="btn btn-ghost btn-sm">全选</button>
+              <button id="clear-all-users" class="btn btn-ghost btn-sm">Clear</button>
+            </div>
+          </div>
+          
+          <!-- SearchUser -->
+          <div class="user-search">
+            <input id="user-search-input" type="text" placeholder="SearchUsername或display name..." class="search-input">
+          </div>
+          
+          <!-- 加载Status -->
+          <div id="users-loading" class="loading-state" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div>正在加载User List...</div>
+          </div>
+          
+          <!-- User List -->
+          <div id="users-list" class="users-list" style="display: none;">
+            <!-- User项将由JavaScript动态生成 -->
+          </div>
+          
+          <!-- 空Status -->
+          <div id="users-empty" class="empty-state" style="display: none;">
+            <div class="empty-icon">👥</div>
+            <div class="empty-title">暂无可AssignUser</div>
+          </div>
+        </div>
+        
+        <!-- 已选User -->
+        <div id="selected-users-section" class="selected-users-section" style="display: none;">
+          <div class="section-header">
+            <h3>已选择User (<span id="selected-count">0</span>)</h3>
+          </div>
+          <div id="selected-users-list" class="selected-users-list">
+            <!-- 已选User将由JavaScript动态生成 -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="subpage-footer">
+        <div class="footer-actions">
+          <button id="assign-subpage-cancel" class="btn btn-secondary">Cancel</button>
+          <button id="assign-subpage-confirm" class="btn btn-primary" disabled>
+            <span class="btn-text">OKAssign</span>
+            <span class="btn-loading" style="display: none;">Assign中...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/js/toast-utils.js"></script>
+  <script type="module" src="/js/mailboxes.js"></script>
+</body>
+</html>
